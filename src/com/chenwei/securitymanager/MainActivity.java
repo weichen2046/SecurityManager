@@ -3,10 +3,6 @@ package com.chenwei.securitymanager;
 import java.util.Iterator;
 import java.util.List;
 
-import com.chenwei.securitymanager.provider.SecurityManagerContract;
-import com.chenwei.securitymanager.R;
-
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -16,23 +12,32 @@ import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.Signature;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+
+import com.chenwei.securitymanager.provider.SecurityManagerContract;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
 
 public class MainActivity extends Activity {
 
     private static String TAG = "MainActivity";
+    private FrameLayout cv = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        cv = (FrameLayout)findViewById(android.R.id.content);
         /* log all installed app infos */
         // this.debugPrintApplicationsInfo(this.getApplicationList(this));
         // this.debugPrintPackagesInfo(this.getPackages(this));
-
-        debugContentProvider();
+        addListViewForCategories();
+        //debugContentProvider();
     }
 
     @Override
@@ -40,6 +45,25 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void addListViewForCategories() {
+        ContentResolver resolver = this.getContentResolver();
+        Cursor cursor = resolver.query(
+                SecurityManagerContract.PrivilegeCategory.CONTENT_URI,
+                SecurityManagerContract.PrivilegeCategory.PROJECTION_ALL, null,
+                null, null);
+        this.startManagingCursor(cursor);
+
+        String[] columns = new String[] { PrivilegeCategory.CATEGORY_ID,
+                PrivilegeCategory.CATEGORY_NAME };
+        int[] to = new int[] { R.id.cat_id, R.id.cat_name };
+        SimpleCursorAdapter cAdapter = new SimpleCursorAdapter(this,
+                R.layout.category_entry, cursor, columns, to);
+        ListView lv = new ListView(this);
+        lv.setAdapter(cAdapter);
+        cv.addView(lv);
+
     }
 
     // debug content provider
