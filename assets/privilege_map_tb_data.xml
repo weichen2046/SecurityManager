@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<privilegemaps>
+    <privilegemap privilege_id="101"  orig_privilege_id="1"/>
+    <privilegemap privilege_id="101"  orig_privilege_id="2"/>
+    <privilegemap privilege_id="102"  orig_privilege_id="3"/>
+    <privilegemap privilege_id="103"  orig_privilege_id="4"/>
+    <privilegemap privilege_id="104"  orig_privilege_id="4"/>
+    <privilegemap privilege_id="105"  orig_privilege_id="5"/>
+    <privilegemap privilege_id="106"  orig_privilege_id="6"/>
+    <privilegemap privilege_id="201"  orig_privilege_id="7"/>
+    <privilegemap privilege_id="201"  orig_privilege_id="8"/>
+    <privilegemap privilege_id="201"  orig_privilege_id="9"/>
+    <privilegemap privilege_id="202"  orig_privilege_id="10"/>
+    <privilegemap privilege_id="203"  orig_privilege_id="10"/>
+    <privilegemap privilege_id="204"  orig_privilege_id="11"/>
+    <privilegemap privilege_id="205"  orig_privilege_id="12"/>
+    <privilegemap privilege_id="206"  orig_privilege_id="13"/>
+    <privilegemap privilege_id="207"  orig_privilege_id="14"/>
+    <privilegemap privilege_id="208"  orig_privilege_id="4"/>
+    <privilegemap privilege_id="209"  orig_privilege_id="15"/>
+    <privilegemap privilege_id="210"  orig_privilege_id="16"/>
+    <privilegemap privilege_id="211"  orig_privilege_id="17"/>
+    <privilegemap privilege_id="211"  orig_privilege_id="18"/>
+    <privilegemap privilege_id="211"  orig_privilege_id="19"/>
+    <privilegemap privilege_id="212"  orig_privilege_id="20"/>
+    <privilegemap privilege_id="301"  orig_privilege_id="21"/>
+</privilegemaps>

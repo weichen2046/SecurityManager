@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<categories>
+    <category cat_id="1" cat_name="通信类"/>
+    <category cat_id="2" cat_name="敏感功能类"/>
+    <category cat_id="3" cat_name="外围接口类"/>
+</categories>
