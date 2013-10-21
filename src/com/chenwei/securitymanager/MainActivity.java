@@ -10,6 +10,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -41,6 +42,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // check whether this is the first time running this application
+        SharedPreferences prefs = getSharedPreferences("configs", MODE_PRIVATE);
+        if (prefs.getBoolean("firstRunning", true)) {
+            // TODO initial privilege config data
+            initPrivilegeConfigureOnce();
+
+            SharedPreferences.Editor edits = prefs.edit();
+            edits.putBoolean("firstRunning", false).commit();
+        }
+
         // need api level 11
         final ActionBar bar = getActionBar();
         bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -71,6 +82,10 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void initPrivilegeConfigureOnce() {
+
     }
 
     private void addListViewForCategories() {
