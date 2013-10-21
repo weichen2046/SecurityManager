@@ -3,7 +3,12 @@ package com.chenwei.securitymanager;
 import java.util.Iterator;
 import java.util.List;
 
+import android.os.Bundle;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.app.ActionBar.Tab;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -14,10 +19,15 @@ import android.content.pm.Signature;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chenwei.securitymanager.provider.SecurityManagerContract;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
@@ -32,11 +42,28 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        cv = (FrameLayout)findViewById(android.R.id.content);
+        // need api level 11
+        final ActionBar bar = getActionBar();
+        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        bar.addTab(bar
+                .newTab()
+                .setText("Simple")
+                .setTabListener(
+                        new TabListener<CountingFragment>(this, "simple",
+                                CountingFragment.class)));
+        bar.addTab(bar
+                .newTab()
+                .setText("Simple2")
+                .setTabListener(
+                        new TabListener<ShowBasePrivilegeFragment>(this,
+                                "simple2", ShowBasePrivilegeFragment.class)));
+        bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+        // cv = (FrameLayout)findViewById(android.R.id.content);
         /* log all installed app infos */
         // this.debugPrintApplicationsInfo(this.getApplicationList(this));
         // this.debugPrintPackagesInfo(this.getPackages(this));
-        addListViewForCategories();
+        // addListViewForCategories();
         //debugContentProvider();
     }
 
@@ -187,6 +214,99 @@ public class MainActivity extends Activity {
             return;
         }
         Log.d(TAG, "Parameter apps is null, doing nothing.");
+    }
+
+    public static class TabListener<T extends Fragment> implements
+            ActionBar.TabListener {
+        private final Activity mActivity;
+        private final String mTag;
+        private final Class<T> mClass;
+        private final Bundle mArgs;
+        private Fragment mFragment;
+
+        public TabListener(Activity activity, String tag, Class<T> clz) {
+            this(activity, tag, clz, null);
+        }
+
+        public TabListener(Activity activity, String tag, Class<T> clz,
+                Bundle args) {
+            mActivity = activity;
+            mTag = tag;
+            mClass = clz;
+            mArgs = args;
+
+            // Check to see if we already have a fragment for this tab, probably
+            // from a previously saved state. If so, deactivate it, because our
+            // initial state is that a tab isn't shown.
+            mFragment = mActivity.getFragmentManager().findFragmentByTag(mTag);
+            if (mFragment != null && !mFragment.isDetached()) {
+                FragmentTransaction ft = mActivity.getFragmentManager()
+                        .beginTransaction();
+                ft.detach(mFragment);
+                ft.commit();
+            }
+        }
+
+        public void onTabSelected(Tab tab, FragmentTransaction ft) {
+            if (mFragment == null) {
+                mFragment = Fragment.instantiate(mActivity, mClass.getName(),
+                        mArgs);
+                ft.add(android.R.id.content, mFragment, mTag);
+            } else {
+                ft.attach(mFragment);
+            }
+        }
+
+        public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+            if (mFragment != null) {
+                ft.detach(mFragment);
+            }
+        }
+
+        public void onTabReselected(Tab tab, FragmentTransaction ft) {
+            Toast.makeText(mActivity, "Reselected!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static class CountingFragment extends Fragment {
+        int mNum;
+
+        /**
+         * Create a new instance of CountingFragment, providing "num" as an
+         * argument.
+         */
+        static CountingFragment newInstance(int num) {
+            CountingFragment f = new CountingFragment();
+
+            // Supply num input as an argument.
+            Bundle args = new Bundle();
+            args.putInt("num", num);
+            f.setArguments(args);
+
+            return f;
+        }
+
+        /**
+         * When creating, retrieve this instance's number from its arguments.
+         */
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+        }
+
+        /**
+         * The Fragment's UI is just a simple text view showing its instance
+         * number.
+         */
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.hello_world, container, false);
+            View tv = v.findViewById(R.id.text);
+            ((TextView) tv).setText("Fragment #" + mNum);
+            return v;
+        }
     }
 
     /**
