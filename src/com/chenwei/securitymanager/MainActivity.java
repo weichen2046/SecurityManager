@@ -3,12 +3,11 @@ package com.chenwei.securitymanager;
 import java.util.Iterator;
 import java.util.List;
 
-import android.os.Bundle;
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.ActionBar.Tab;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -45,20 +44,20 @@ public class MainActivity extends Activity {
         // need api level 11
         final ActionBar bar = getActionBar();
         bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 
         bar.addTab(bar
                 .newTab()
-                .setText("Simple")
+                .setText(R.string.by_privilege)
                 .setTabListener(
-                        new TabListener<CountingFragment>(this, "simple",
-                                CountingFragment.class)));
+                        new TabListener<ShowByPrivilegeFragment>(this,
+                                "privilege", ShowByPrivilegeFragment.class)));
         bar.addTab(bar
                 .newTab()
-                .setText("Simple2")
+                .setText(R.string.by_app)
                 .setTabListener(
-                        new TabListener<ShowBasePrivilegeFragment>(this,
-                                "simple2", ShowBasePrivilegeFragment.class)));
-        bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+                        new TabListener<CountingFragment>(this, "application",
+                                CountingFragment.class)));
         // cv = (FrameLayout)findViewById(android.R.id.content);
         /* log all installed app infos */
         // this.debugPrintApplicationsInfo(this.getApplicationList(this));
