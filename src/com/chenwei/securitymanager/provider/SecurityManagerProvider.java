@@ -2,6 +2,7 @@ package com.chenwei.securitymanager.provider;
 
 import com.chenwei.securitymanager.provider.DBSchema.Tables;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeMap;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -26,6 +27,7 @@ public class SecurityManagerProvider extends ContentProvider {
     private static final int PRIVILEGE_CATEGORY_MATCH = 1;
     private static final int PRIVILEGE_DETAILS_MATCH = 2;
     private static final int PRIVILEGE_CONFIG_MATCH = 3;
+    private static final int ANDROID_PERMISIONS_MATCH = 4;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -38,6 +40,8 @@ public class SecurityManagerProvider extends ContentProvider {
         sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
                 Tables.PRIVILEGE_CONFIG,
                 PRIVILEGE_CONFIG_MATCH);
+        sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
+                "android_permission/#", ANDROID_PERMISIONS_MATCH);
     }
 
     @Override
@@ -76,6 +80,15 @@ public class SecurityManagerProvider extends ContentProvider {
             qb.setTables(Tables.PRIVILEGE_CONFIG);
             break;
 
+        case ANDROID_PERMISIONS_MATCH:
+            qb.setTables("privilege_map left join android_origin_privilege "
+                    + "on privilege_map.orig_privilege_id = android_origin_privilege.orig_privilege_id");
+            // TODO Need refactoring
+            qb.appendWhere("privilege_map.privilege_id=(select "
+                    + "privilege_details.privilege_id from privilege_details where privilege_details._id="
+                    + uri.getPathSegments().get(1) + ")");
+            break;
+
         default:
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -84,6 +97,8 @@ public class SecurityManagerProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor c = qb.query(db, projection, selection, selectionArgs, null,
                 null, orderBy);
+
+        Log.d(TAG, "Current query has row: " + c.getCount());
 
         // Tell the cursor what uri to watch, so it knows when its source data
         // changes

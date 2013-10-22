@@ -1,8 +1,9 @@
-package com.chenwei.securitymanager;
+package com.sprd.securitymanager;
 
 import android.app.Fragment;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,14 +15,14 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.SimpleCursorTreeAdapter;
 
-import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
-import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
+import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
+import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 // reference urls:
 // http://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
 // http://stackoverflow.com/questions/16791963/expandablelistview-within-fragment
 
-public class ShowByPrivilegeFragment extends Fragment {
+public class ShowPrivilegesFragment extends Fragment {
 
     private static final String TAG = "ShowByPrivilegeFragment";
 
@@ -70,8 +71,10 @@ public class ShowByPrivilegeFragment extends Fragment {
                         "Child clicked, row id = %d, groupPosition = %d, childPosition = %d", id,
                         groupPosition, childPosition));
                 // TODO start activity show applications associate to the
-                // selected privilege
-
+                Intent intent = new Intent(
+                        "android.intent.show_app_by_privilege");
+                intent.putExtra("privilegeId", id);
+                getActivity().startActivity(intent);
                 return true;
             }
         });

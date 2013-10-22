@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -45,9 +46,7 @@ public class MainActivity extends Activity {
         // check whether this is the first time running this application
         SharedPreferences prefs = getSharedPreferences("configs", MODE_PRIVATE);
         if (prefs.getBoolean("firstRunning", true)) {
-            // TODO initial privilege config data
             initPrivilegeConfigureOnce();
-
             SharedPreferences.Editor edits = prefs.edit();
             edits.putBoolean("firstRunning", false).commit();
         }
@@ -61,8 +60,8 @@ public class MainActivity extends Activity {
                 .newTab()
                 .setText(R.string.by_privilege)
                 .setTabListener(
-                        new TabListener<ShowByPrivilegeFragment>(this,
-                                "privilege", ShowByPrivilegeFragment.class)));
+                        new TabListener<ShowPrivilegesFragment>(this,
+                                "privilege", ShowPrivilegesFragment.class)));
         bar.addTab(bar
                 .newTab()
                 .setText(R.string.by_app)
@@ -74,7 +73,7 @@ public class MainActivity extends Activity {
         // this.debugPrintApplicationsInfo(this.getApplicationList(this));
         // this.debugPrintPackagesInfo(this.getPackages(this));
         // addListViewForCategories();
-        //debugContentProvider();
+        // debugContentProvider();
     }
 
     @Override
@@ -84,8 +83,14 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    /**
+     *
+     */
     private void initPrivilegeConfigureOnce() {
-
+        // show progress
+        // query apps info
+        // handle app privilege configure by debfault
+        // dismiss progress
     }
 
     private void addListViewForCategories() {
@@ -112,6 +117,8 @@ public class MainActivity extends Activity {
         ContentResolver resolver = this.getContentResolver();
         debugTablePrivilegeCategory(resolver);
         
+        debugPermissionsByPrivilege(resolver, 101);
+
         debugTablePrivilegeDetails(resolver, 1);
         Log.d(TAG, "*************************");
         debugTablePrivilegeDetails(resolver, 2);
@@ -119,6 +126,26 @@ public class MainActivity extends Activity {
         debugTablePrivilegeDetails(resolver, 3);
     }
     
+    private void debugPermissionsByPrivilege(ContentResolver resolver,
+            int privilegeId) {
+        Cursor cursor = resolver.query(ContentUris.withAppendedId(
+                SecurityManagerContract.PERMISSION_BY_PRIVILEGE_URI,
+                privilegeId),
+                SecurityManagerContract.PERMISSION_BY_PRIVILEGE_PROJECTION,
+                null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String permission = cursor.getString(0);
+                Log.d(TAG, String.format("privilege %d has permission %s.",
+                        privilegeId, permission));
+            } while (cursor.moveToNext());
+        } else {
+            Log.d(TAG,
+                    "Query privilege_details table, cursor is null or have no records in it.");
+        }
+        cursor.close();
+    }
+
     private void debugTablePrivilegeDetails(ContentResolver resolver,
             int categoryId) {
         Cursor cursor = resolver.query(
@@ -139,6 +166,7 @@ public class MainActivity extends Activity {
             Log.d(TAG,
                     "Query privilege_details table, cursor is null or have no records in it.");
         }
+        cursor.close();
     }
 
     private void debugTablePrivilegeCategory(ContentResolver resolver) {

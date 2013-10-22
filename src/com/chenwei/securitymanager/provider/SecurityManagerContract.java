@@ -24,6 +24,12 @@ public final class SecurityManagerContract {
     private SecurityManagerContract() {
     }
 
+    public static final Uri PERMISSION_BY_PRIVILEGE_URI = Uri
+            .parse("content://" + AUTHORITY + "/android_permission");
+    public static final String[] PERMISSION_BY_PRIVILEGE_PROJECTION = new String[] {
+            PrivilegeDetails.PRIVILEGE_ID,
+            AndroidOriginPrivilege.ORIG_PRIVILEGE_NAME };
+
     /**
      * Constants and helpers for the privilege_category table
      * */
