@@ -1,4 +1,5 @@
-package com.sprd.securitymanager;
+
+package com.chenwei.securitymanager;
 
 import java.io.File;
 import java.text.Collator;
@@ -6,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.sprd.securitymanager.provider.SecurityManagerContract;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -22,20 +21,21 @@ import android.content.Loader;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionInfo;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.chenwei.securitymanager.provider.SecurityManagerContract;
 
 public class ShowAppByPrivilegeActivity extends Activity {
 
@@ -443,6 +443,25 @@ public class ShowAppByPrivilegeActivity extends Activity {
             ((ImageView) view.findViewById(R.id.config_icon))
                     .setImageResource(android.R.drawable.ic_delete);
 
+            view.findViewById(R.id.config_icon).setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    Log.d(TAG, "Config icon clicked.");
+
+                }
+            });
+
+            // uncomment these line will disable the blue backgound when clicked
+            // view.setOnClickListener(new OnClickListener() {
+            //
+            // @Override
+            // public void onClick(View v) {
+            // // TODO Auto-generated method stub
+            //
+            // }
+            // });
             return view;
         }
     }

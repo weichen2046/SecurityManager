@@ -1,4 +1,5 @@
-package com.sprd.securitymanager;
+
+package com.chenwei.securitymanager;
 
 import android.app.Fragment;
 import android.content.AsyncQueryHandler;
@@ -15,8 +16,8 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.SimpleCursorTreeAdapter;
 
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 // reference urls:
 // http://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
