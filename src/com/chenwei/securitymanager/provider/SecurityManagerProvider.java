@@ -1,9 +1,5 @@
 package com.chenwei.securitymanager.provider;
 
-import com.chenwei.securitymanager.provider.DBSchema.Tables;
-import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
-import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeMap;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -13,6 +9,10 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.chenwei.securitymanager.provider.DBSchema.Tables;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 public class SecurityManagerProvider extends ContentProvider {
 

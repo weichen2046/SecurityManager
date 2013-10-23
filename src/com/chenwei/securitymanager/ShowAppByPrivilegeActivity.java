@@ -21,7 +21,6 @@ import android.content.Loader;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -36,9 +35,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.chenwei.securitymanager.provider.SecurityManagerContract;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfigures;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfigures;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 public class ShowAppByPrivilegeActivity extends Activity {
 
@@ -180,51 +179,23 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
             final Context context = getContext();
             mPermissions = getPrivilegePermissions(context);
-            // Create corresponding array of entries and load their labels.
-            String packageLabel = ""; // for debug
-            // int count1 = 0; // for debug
-            // int count2 = 0; // for debug
             List<AppEntry> entries = new ArrayList<AppEntry>(packages.size());
             for (int i = 0; i < packages.size(); i++) {
-                packageLabel = packages.get(i).applicationInfo
-                        .loadLabel(mPm).toString();
-                PermissionInfo[] pers = packages.get(i).permissions;
-                Log.d(TAG, String.format(
-                        "package name: %s has %d permissions.", packageLabel,
-                        ((pers == null) ? 0 : pers.length)));
-                if (pers != null) {
-                    for (int j = 0; j < pers.length; j++) {
-                        if (containsPermission(pers[j].name)) {
+                Log.d(TAG, "AppEntry first count: " + entries.size());
+                String[] requestedPermissions = packages.get(i).requestedPermissions;
+                if (requestedPermissions != null) {
+                    for (int j = 0; j < requestedPermissions.length; j++) {
+                        if (containsPermission(requestedPermissions[j])) {
                             AppEntry entry = new AppEntry(this, packages.get(i));
+                            entry.setPrivilegeConfig(getPrivilegeConfigure(
+                                    packages.get(i).packageName,
+                                    getPrivilegeId(privilegeRowId)));
                             entry.loadLabel(context);
                             entries.add(entry);
                             break;
                         }
                     }
                 }
-                // count1 = entries.size(); // for debug
-                Log.d(TAG, "AppEntry first count: " + entries.size());
-                String[] requestedPermissions = packages.get(i).requestedPermissions;
-                if (requestedPermissions != null) {
-                for (int j = 0; j < requestedPermissions.length; j++) {
-                    if (containsPermission(requestedPermissions[j])) {
-                        AppEntry entry = new AppEntry(this, packages.get(i));
-                            entry.setPrivilegeConfig(getPrivilegeConfigure(
-                                    packages.get(i).packageName,
-                                    getPrivilegeId(privilegeRowId)));
-                            entry.loadLabel(context);
-                            entries.add(entry);
-                        break;
-                    }
-                    }
-                }
-                // count2 = entries.size();
-                // if (count1 != count2) {
-                // Log.d(TAG, String.format(
-                // "noteqaul, package: %s count1: %d, count2: %d",
-                // packageLabel,
-                // count1, count2));
-                // }
             }
 
             // Sort the list.

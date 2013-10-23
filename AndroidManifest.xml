@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.sprd.securitymanager.ShowAppByPrivilegeActivity">
+            android:name="com.chenwei.securitymanager.ShowAppByPrivilegeActivity">
             <intent-filter>
                 <action android:name="android.intent.show_app_by_privilege" />
 
