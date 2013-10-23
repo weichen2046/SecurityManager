@@ -26,6 +26,7 @@ public class SecurityManagerProvider extends ContentProvider {
      */
     private static final int PRIVILEGE_CATEGORY_MATCH = 1;
     private static final int PRIVILEGE_DETAILS_MATCH = 2;
+    private static final int PRIVILEGE_DETAILS_ITEM_MATCH = 21;
     private static final int PRIVILEGE_CONFIG_MATCH = 3;
     private static final int ANDROID_PERMISIONS_MATCH = 4;
 
@@ -38,8 +39,12 @@ public class SecurityManagerProvider extends ContentProvider {
                 "privilege_details",
                 PRIVILEGE_DETAILS_MATCH);
         sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
-                Tables.PRIVILEGE_CONFIG,
+                "privilege_details/#", PRIVILEGE_DETAILS_ITEM_MATCH);
+        sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
+                "privilege_config",
                 PRIVILEGE_CONFIG_MATCH);
+        // # is represent for privilege row id in table privilege_details
+        // may be this need refactoring
         sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
                 "android_permission/#", ANDROID_PERMISIONS_MATCH);
     }
@@ -74,6 +79,12 @@ public class SecurityManagerProvider extends ContentProvider {
             } else {
                 orderBy = sortOrder;
             }
+            break;
+            
+        case PRIVILEGE_DETAILS_ITEM_MATCH:
+            qb.setTables(Tables.PRIVILEGE_DETAILS);
+            qb.appendWhere(PrivilegeDetails._ID + "="
+                    + uri.getPathSegments().get(1));
             break;
 
         case PRIVILEGE_CONFIG_MATCH:

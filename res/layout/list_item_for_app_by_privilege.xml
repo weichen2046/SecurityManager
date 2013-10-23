@@ -49,7 +49,5 @@
         android:layout_height="@dimen/divider_bar_size"
         android:layout_gravity="center_vertical"
     />
-    <!-- btn_check_buttonless_on.png -->
-    <!-- ic_delete.png ic_lockscreen_forgotpassword_pressed.png -->
 
 </LinearLayout>

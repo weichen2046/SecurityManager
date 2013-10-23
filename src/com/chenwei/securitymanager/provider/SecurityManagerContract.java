@@ -30,6 +30,12 @@ public final class SecurityManagerContract {
             PrivilegeDetails.PRIVILEGE_ID,
             AndroidOriginPrivilege.ORIG_PRIVILEGE_NAME };
 
+    public interface PrivilegeConfigures {
+        int ALLOW = 0;
+        int DENY = 1;
+        int QUESTION = 2;
+    }
+
     /**
      * Constants and helpers for the privilege_category table
      * */
@@ -147,6 +153,8 @@ public final class SecurityManagerContract {
          */
         public static final String[] PROJECTION_FOR_SPECIFIC_CATEGORY = { _ID,
                 PRIVILEGE_ID, PRIVILEGE_NAME, ID_IN_CATEGORY };
+        public static final String[] PROJECTION_FOR_ALL = { _ID, PRIVILEGE_ID,
+                PRIVILEGE_NAME, CATEGORY_ID, ID_IN_CATEGORY };
 
         /**
          * define default sort order.
@@ -224,6 +232,8 @@ public final class SecurityManagerContract {
      * Constants and helpers for the PrivilegeConfig table
      * */
     public static final class PrivilegeConfig implements BaseColumns {
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(
+                SecurityManagerContract.CONTENT_URI, "privilege_config");
         /**
          * column package_name.
          * 
@@ -268,6 +278,8 @@ public final class SecurityManagerContract {
          * </p>
          */
         public static final String ASSIST = "assist";
+
+        public static final String[] PROJECTION_FOR_CONFIGURE = new String[] { PERMISSION };
 
         public static int ALLOW = 0;
         public static int FOBIDDEN = 1;

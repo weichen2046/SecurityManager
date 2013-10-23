@@ -36,6 +36,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.chenwei.securitymanager.provider.SecurityManagerContract;
+import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
+import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfigures;
+import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 public class ShowAppByPrivilegeActivity extends Activity {
 
@@ -69,6 +72,7 @@ public class ShowAppByPrivilegeActivity extends Activity {
         private String mLabel;
         private Drawable mIcon;
         private boolean mMounted;
+        private int mPrivilegeConfig;
 
         public AppEntry(AppListLoader loader, PackageInfo info) {
             mLoader = loader;
@@ -82,6 +86,14 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
         public String getLabel() {
             return mLabel;
+        }
+
+        public int getPrivilegeConfig() {
+            return mPrivilegeConfig;
+        }
+
+        public void setPrivilegeConfig(int config) {
+            mPrivilegeConfig = config;
         }
 
         public Drawable getIcon() {
@@ -197,8 +209,11 @@ public class ShowAppByPrivilegeActivity extends Activity {
                 for (int j = 0; j < requestedPermissions.length; j++) {
                     if (containsPermission(requestedPermissions[j])) {
                         AppEntry entry = new AppEntry(this, packages.get(i));
-                        entry.loadLabel(context);
-                        entries.add(entry);
+                            entry.setPrivilegeConfig(getPrivilegeConfigure(
+                                    packages.get(i).packageName,
+                                    getPrivilegeId(privilegeRowId)));
+                            entry.loadLabel(context);
+                            entries.add(entry);
                         break;
                     }
                     }
@@ -292,6 +307,62 @@ public class ShowAppByPrivilegeActivity extends Activity {
         protected void onReleaseResources(List<AppEntry> apps) {
             // For a simple List<> there is nothing to do. For something
             // like a Cursor, we would close it here.
+        }
+
+        /**
+         * 
+         * @param rowId
+         * @return
+         */
+        private int getPrivilegeId(long rowId) {
+            int id = 0;
+            ContentResolver resolver = getContext().getContentResolver();
+            // String where = PrivilegeConfig.PACKAGE_NAME + "=? AND "
+            // PrivilegeConfig.pri;
+            // TODO
+            Cursor cursor = resolver.query(ContentUris.withAppendedId(
+                    PrivilegeDetails.CONTENT_URI, rowId),
+                    PrivilegeDetails.PROJECTION_FOR_ALL, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                id = cursor.getInt(1); // 1 for PRIVILEGE_ID in
+                                       // PROJECTION_FOR_ALL
+                Log.d(TAG, String.format(
+                        "privilege row id: %d, privilege id: %d", rowId, id));
+            } else {
+                Log.d(TAG,
+                        "Query privilege_details table, cursor is null or have no records in it.");
+            }
+            cursor.close();
+            return id;
+        }
+
+        /**
+         * 
+         * @param packageName
+         * @param privilegeRowId
+         * @return
+         */
+        private int getPrivilegeConfigure(String packageName, int privilegeId) {
+            int configure = PrivilegeConfigures.QUESTION; // default case
+
+            ContentResolver resolver = getContext().getContentResolver();
+            String where = PrivilegeConfig.PACKAGE_NAME + "=? AND "
+                    + PrivilegeConfig.PRIVILEGE_ID + "=CAST(? AS INTEGER)";
+            Cursor cursor = resolver.query(PrivilegeConfig.CONTENT_URI,
+                    PrivilegeConfig.PROJECTION_FOR_CONFIGURE, where,
+                    new String[] { packageName, String.valueOf(privilegeId) },
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                configure = cursor.getInt(0);
+                Log.d(TAG, String.format(
+                        "package: %s, privilegeRowId: %d, configure: %d",
+                        packageName, privilegeRowId, configure));
+            } else {
+                Log.d(TAG,
+                        "Query privilege_config table, cursor is null or have no records in it.");
+            }
+            cursor.close();
+            return configure;
         }
 
         /**
@@ -440,8 +511,21 @@ public class ShowAppByPrivilegeActivity extends Activity {
                     .getIcon());
             ((TextView) view.findViewById(R.id.app_label)).setText(item
                     .getLabel());
+            int icon_id = R.drawable.privilege_question;
+            switch (item.getPrivilegeConfig()) {
+            case PrivilegeConfigures.ALLOW:
+                icon_id = R.drawable.privilege_allow;
+                break;
+            case PrivilegeConfigures.DENY:
+                icon_id = R.drawable.privilege_deny;
+                break;
+            default:
+            case PrivilegeConfigures.QUESTION:
+                icon_id = R.drawable.privilege_question;
+                break;
+            }
             ((ImageView) view.findViewById(R.id.config_icon))
-                    .setImageResource(android.R.drawable.ic_delete);
+                    .setImageResource(icon_id);
 
             view.findViewById(R.id.config_icon).setOnClickListener(new OnClickListener() {
 
