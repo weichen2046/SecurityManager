@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="permission_choices">
+        <item>允许</item>
+        <item>拒绝</item>
+        <item>每次询问</item>
+    </string-array>
+</resources>

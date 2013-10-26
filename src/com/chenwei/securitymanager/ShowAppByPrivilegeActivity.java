@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -16,6 +17,7 @@ import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.ApplicationInfo;
@@ -281,7 +283,6 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * 
          * @param rowId
          * @return
          */
@@ -308,7 +309,6 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * 
          * @param packageName
          * @param privilegeRowId
          * @return
@@ -321,7 +321,9 @@ public class ShowAppByPrivilegeActivity extends Activity {
                     + PrivilegeConfig.PRIVILEGE_ID + "=CAST(? AS INTEGER)";
             Cursor cursor = resolver.query(PrivilegeConfig.CONTENT_URI,
                     PrivilegeConfig.PROJECTION_FOR_CONFIGURE, where,
-                    new String[] { packageName, String.valueOf(privilegeId) },
+                    new String[] {
+                            packageName, String.valueOf(privilegeId)
+                    },
                     null);
             if (cursor != null && cursor.moveToFirst()) {
                 configure = cursor.getInt(0);
@@ -337,7 +339,6 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * 
          * @param context
          * @return
          */
@@ -349,8 +350,8 @@ public class ShowAppByPrivilegeActivity extends Activity {
                     .query(ContentUris
                             .withAppendedId(
                                     SecurityManagerContract.PERMISSION_BY_PRIVILEGE_URI,
-                    privilegeRowId),
-                    SecurityManagerContract.PERMISSION_BY_PRIVILEGE_PROJECTION,
+                                    privilegeRowId),
+                            SecurityManagerContract.PERMISSION_BY_PRIVILEGE_PROJECTION,
                             null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 do {
@@ -369,12 +370,11 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * 
          * @param permission
          * @return
          */
         private boolean containsPermission(String permission) {
-            for(int i=0; i<mPermissions.size(); i++) {
+            for (int i = 0; i < mPermissions.size(); i++) {
                 if (mPermissions.get(i).equals(permission)) {
                     return true;
                 }
@@ -412,7 +412,6 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * 
          * @param id
          */
         public void setPrivilegeId(long id) {
@@ -479,21 +478,21 @@ public class ShowAppByPrivilegeActivity extends Activity {
             AppEntry item = getItem(position);
             ((ImageView) view.findViewById(R.id.app_icon))
                     .setImageDrawable(item
-                    .getIcon());
+                            .getIcon());
             ((TextView) view.findViewById(R.id.app_label)).setText(item
                     .getLabel());
             int icon_id = R.drawable.privilege_question;
             switch (item.getPrivilegeConfig()) {
-            case PrivilegeConfigures.ALLOW:
-                icon_id = R.drawable.privilege_allow;
-                break;
-            case PrivilegeConfigures.DENY:
-                icon_id = R.drawable.privilege_deny;
-                break;
-            default:
-            case PrivilegeConfigures.QUESTION:
-                icon_id = R.drawable.privilege_question;
-                break;
+                case PrivilegeConfigures.ALLOW:
+                    icon_id = R.drawable.privilege_allow;
+                    break;
+                case PrivilegeConfigures.DENY:
+                    icon_id = R.drawable.privilege_deny;
+                    break;
+                default:
+                case PrivilegeConfigures.QUESTION:
+                    icon_id = R.drawable.privilege_question;
+                    break;
             }
             ((ImageView) view.findViewById(R.id.config_icon))
                     .setImageResource(icon_id);
@@ -502,21 +501,33 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
                 @Override
                 public void onClick(View v) {
-                    // TODO Auto-generated method stub
                     Log.d(TAG, "Config icon clicked.");
-
+                    AlertDialog dialog = new AlertDialog.Builder(AppListAdapter.this.getContext())
+                            .setIconAttribute(android.R.attr.alertDialogIcon)
+                            .setTitle(R.string.permission_config)
+                            .setSingleChoiceItems(R.array.permission_choices, 0,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            // TODO
+                                        }
+                                    })
+                            .setPositiveButton(R.string.alert_dialog_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            // TODO
+                                        }
+                                    })
+                            .setNegativeButton(R.string.alert_dialog_cancel,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            // TODO
+                                        }
+                                    }).create();
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
                 }
             });
 
-            // uncomment these line will disable the blue backgound when clicked
-            // view.setOnClickListener(new OnClickListener() {
-            //
-            // @Override
-            // public void onClick(View v) {
-            // // TODO Auto-generated method stub
-            //
-            // }
-            // });
             return view;
         }
     }
