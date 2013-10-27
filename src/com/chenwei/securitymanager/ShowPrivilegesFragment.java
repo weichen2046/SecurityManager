@@ -71,10 +71,8 @@ public class ShowPrivilegesFragment extends Fragment {
                 Log.d(TAG, String.format(
                         "Child clicked, row id = %d, groupPosition = %d, childPosition = %d", id,
                         groupPosition, childPosition));
-                // TODO start activity show applications associate to the
-                Intent intent = new Intent(
-                        "android.intent.show_app_by_privilege");
-                intent.putExtra("privilegeId", id);
+                Intent intent = new Intent(ShowAppByPrivilegeActivity.ACTION);
+                intent.putExtra(ShowAppByPrivilegeActivity.PRIVILEGE_ROW_ID_EXTRA, id);
                 getActivity().startActivity(intent);
                 return true;
             }

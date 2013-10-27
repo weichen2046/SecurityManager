@@ -1,10 +1,10 @@
 package com.chenwei.securitymanager.provider;
 
-import com.chenwei.securitymanager.provider.DBSchema.Tables;
-
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
+
+import com.chenwei.securitymanager.provider.DBSchema.Tables;
 
 public final class SecurityManagerContract {
 
@@ -31,9 +31,11 @@ public final class SecurityManagerContract {
             AndroidOriginPrivilege.ORIG_PRIVILEGE_NAME };
 
     public interface PrivilegeConfigures {
+        int NOT_CONFIG = -1;
         int ALLOW = 0;
         int DENY = 1;
         int QUESTION = 2;
+
     }
 
     /**

@@ -16,6 +16,7 @@ import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,24 +45,24 @@ import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDet
 
 public class ShowAppByPrivilegeActivity extends Activity {
 
+    public static final String PRIVILEGE_ROW_ID_EXTRA = "privilegeRowId";
+    public static final String ACTION = "android.intent.show_app_by_privilege";
     private static final String TAG = "ShowAppByPrivilegeActivity";
-    TextView tv;
-    long privilege_row_id;
+    long mPrivilegeRowId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        privilege_row_id = intent.getLongExtra("privilegeId", -1);
-        Log.d(TAG, "Passed in privilege_row_id = " + privilege_row_id);
+        mPrivilegeRowId = intent.getLongExtra(PRIVILEGE_ROW_ID_EXTRA, -1);
+        Log.d(TAG, "Passed in privilege row id = " + mPrivilegeRowId);
 
         FragmentManager fm = getFragmentManager();
 
         // Create the list fragment and add it as our sole content.
         if (fm.findFragmentById(android.R.id.content) == null) {
             AppListFragment list = new AppListFragment();
-            list.setPrivilegeId(privilege_row_id);
             fm.beginTransaction().add(android.R.id.content, list).commit();
         }
 
@@ -74,6 +76,7 @@ public class ShowAppByPrivilegeActivity extends Activity {
         private Drawable mIcon;
         private boolean mMounted;
         private int mPrivilegeConfig;
+        private int mPrivilegeId;
 
         public AppEntry(AppListLoader loader, PackageInfo info) {
             mLoader = loader;
@@ -95,6 +98,27 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
         public void setPrivilegeConfig(int config) {
             mPrivilegeConfig = config;
+        }
+
+        public int getPermissionConfigIconId() {
+            int icon_id = R.drawable.privilege_question;
+            switch (mPrivilegeConfig) {
+                case PrivilegeConfigures.ALLOW:
+                    icon_id = R.drawable.privilege_allow;
+                    break;
+                case PrivilegeConfigures.DENY:
+                    icon_id = R.drawable.privilege_deny;
+                    break;
+                case PrivilegeConfigures.NOT_CONFIG:
+                case PrivilegeConfigures.QUESTION:
+                    icon_id = R.drawable.privilege_question;
+                    break;
+                default:
+                    Log.w(TAG, "Invalid permission config value: "
+                            + mPrivilegeConfig);
+                    break;
+            }
+            return icon_id;
         }
 
         public Drawable getIcon() {
@@ -156,18 +180,24 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
     public static class AppListLoader extends AsyncTaskLoader<List<AppEntry>> {
         final PackageManager mPm;
-        long privilegeRowId;
+        long mPrivilegeRowId;
         List<AppEntry> mApps;
-        List<String> mPermissions = new ArrayList<String>();
+        List<String> mPermissions;
 
-        public AppListLoader(Context context, long privilegeRowId) {
+        public AppListLoader(Context context) {
             super(context);
 
             // Retrieve the package manager for later use; note we don't
             // use 'context' directly but instead the save global application
             // context returned by getContext().
             mPm = getContext().getPackageManager();
-            this.privilegeRowId = privilegeRowId;
+            ShowAppByPrivilegeActivity myActivity = (ShowAppByPrivilegeActivity) context;
+            if(myActivity != null) {
+                mPrivilegeRowId = myActivity.mPrivilegeRowId;
+                Log.d(TAG, "Privilege row id: " + mPrivilegeRowId);
+            } else {
+                Log.e(TAG, "Cannot get privilege row id from Activity.");
+            }
         }
 
         @Override
@@ -180,18 +210,19 @@ public class ShowAppByPrivilegeActivity extends Activity {
             }
 
             final Context context = getContext();
-            mPermissions = getPrivilegePermissions(context);
+            mPermissions = getMappedPermissions(mPrivilegeRowId);
+            final int priviligeId = getPrivilegeId(mPrivilegeRowId);
             List<AppEntry> entries = new ArrayList<AppEntry>(packages.size());
             for (int i = 0; i < packages.size(); i++) {
                 Log.d(TAG, "AppEntry first count: " + entries.size());
                 String[] requestedPermissions = packages.get(i).requestedPermissions;
                 if (requestedPermissions != null) {
                     for (int j = 0; j < requestedPermissions.length; j++) {
-                        if (containsPermission(requestedPermissions[j])) {
+                        if (mPermissions.contains(requestedPermissions[j])) {
                             AppEntry entry = new AppEntry(this, packages.get(i));
-                            entry.setPrivilegeConfig(getPrivilegeConfigure(
-                                    packages.get(i).packageName,
-                                    getPrivilegeId(privilegeRowId)));
+                            entry.mPrivilegeId = priviligeId;
+                            entry.mPrivilegeConfig = getPermissionConfiguration(
+                                    packages.get(i).packageName, priviligeId);
                             entry.loadLabel(context);
                             entries.add(entry);
                             break;
@@ -283,15 +314,14 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
-         * @param rowId
-         * @return
+         * get privilege id use privilege row id in database.
+         * 
+         * @param rowId privilege row id in database.
+         * @return privilege id, this id is defined by design document.
          */
         private int getPrivilegeId(long rowId) {
             int id = 0;
             ContentResolver resolver = getContext().getContentResolver();
-            // String where = PrivilegeConfig.PACKAGE_NAME + "=? AND "
-            // PrivilegeConfig.pri;
-            // TODO
             Cursor cursor = resolver.query(ContentUris.withAppendedId(
                     PrivilegeDetails.CONTENT_URI, rowId),
                     PrivilegeDetails.PROJECTION_FOR_ALL, null, null, null);
@@ -309,12 +339,16 @@ public class ShowAppByPrivilegeActivity extends Activity {
         }
 
         /**
+         * get an application's permission's configuration against one
+         * privilege.
+         * 
          * @param packageName
-         * @param privilegeRowId
-         * @return
+         * @param privilegeId
+         * @return permission configuration. PrivilegeConfigures defined those
+         *         valaid values.
          */
-        private int getPrivilegeConfigure(String packageName, int privilegeId) {
-            int configure = PrivilegeConfigures.QUESTION; // default case
+        private int getPermissionConfiguration(String packageName, int privilegeId) {
+            int permission = PrivilegeConfigures.NOT_CONFIG; // default case
 
             ContentResolver resolver = getContext().getContentResolver();
             String where = PrivilegeConfig.PACKAGE_NAME + "=? AND "
@@ -326,31 +360,35 @@ public class ShowAppByPrivilegeActivity extends Activity {
                     },
                     null);
             if (cursor != null && cursor.moveToFirst()) {
-                configure = cursor.getInt(0);
+                permission = cursor.getInt(0);
                 Log.d(TAG, String.format(
-                        "package: %s, privilegeRowId: %d, configure: %d",
-                        packageName, privilegeRowId, configure));
+                        "package: %s, privilegeId: %d, permission: %d",
+                        packageName, privilegeId, permission));
             } else {
                 Log.d(TAG,
                         "Query privilege_config table, cursor is null or have no records in it.");
             }
             cursor.close();
-            return configure;
+            return permission;
         }
 
         /**
-         * @param context
+         * get mapped permissions use privilege row id.
+         * 
+         * @param privilegeRowId
          * @return
          */
-        private List<String> getPrivilegePermissions(Context context) {
+        private List<String> getMappedPermissions(long privilegeRowId) {
+            // TODO this function need refactor to use privilege id, but not row
+            // id
             List<String> permissions = new ArrayList<String>();
             // get privilege mapped permissions
-            ContentResolver resolver = context.getContentResolver();
+            ContentResolver resolver = getContext().getContentResolver();
             Cursor cursor = resolver
                     .query(ContentUris
                             .withAppendedId(
                                     SecurityManagerContract.PERMISSION_BY_PRIVILEGE_URI,
-                                    privilegeRowId),
+                                    mPrivilegeRowId),
                             SecurityManagerContract.PERMISSION_BY_PRIVILEGE_PROJECTION,
                             null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -368,26 +406,12 @@ public class ShowAppByPrivilegeActivity extends Activity {
             cursor.close();
             return permissions;
         }
-
-        /**
-         * @param permission
-         * @return
-         */
-        private boolean containsPermission(String permission) {
-            for (int i = 0; i < mPermissions.size(); i++) {
-                if (mPermissions.get(i).equals(permission)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
     public static class AppListFragment extends ListFragment implements
             LoaderManager.LoaderCallbacks<List<AppEntry>> {
         // This is the Adapter being used to display the list's data.
         AppListAdapter mAdapter;
-        long privilegeRowId;
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
@@ -406,16 +430,8 @@ public class ShowAppByPrivilegeActivity extends Activity {
 
         @Override
         public Loader<List<AppEntry>> onCreateLoader(int id, Bundle args) {
-            // This is called when a new Loader needs to be created. This
-            // sample only has one Loader with no arguments, so it is simple.
-            return new AppListLoader(getActivity(), privilegeRowId);
-        }
-
-        /**
-         * @param id
-         */
-        public void setPrivilegeId(long id) {
-            privilegeRowId = id;
+            // This is called when a new Loader needs to be created.
+            return new AppListLoader(getActivity());
         }
 
         @Override
@@ -460,6 +476,27 @@ public class ShowAppByPrivilegeActivity extends Activity {
             }
         }
 
+        public void insertOrUpdatePermission(AppEntry item, int permission) {
+            ContentResolver resolver = getContext().getContentResolver();
+            if (item.getPrivilegeConfig() == PrivilegeConfigures.NOT_CONFIG) {
+                // insert
+                ContentValues values = new ContentValues();
+                values.put(PrivilegeConfig.PACKAGE_NAME, item.mInfo.packageName);
+                values.put(PrivilegeConfig.PACKAGE_UID, item.mInfo.uid);
+                values.put(PrivilegeConfig.PRIVILEGE_ID, item.mPrivilegeId);
+                values.put(PrivilegeConfig.PERMISSION, permission);
+                resolver.insert(PrivilegeConfig.CONTENT_URI, values);
+            } else {
+                // update
+                ContentValues values = new ContentValues();
+                values.put(PrivilegeConfig.PERMISSION, permission);
+                String where = PrivilegeConfig.PACKAGE_NAME + "='" + item.mInfo.packageName
+                        + "' AND " + PrivilegeConfig.PRIVILEGE_ID + "=" + item.mPrivilegeId;
+                resolver.update(PrivilegeConfig.CONTENT_URI, values, where, null);
+            }
+            item.setPrivilegeConfig(permission);
+        }
+
         /**
          * Populate new items in the list.
          */
@@ -475,54 +512,49 @@ public class ShowAppByPrivilegeActivity extends Activity {
                 view = convertView;
             }
 
-            AppEntry item = getItem(position);
+            final AppEntry item = getItem(position);
             ((ImageView) view.findViewById(R.id.app_icon))
                     .setImageDrawable(item
                             .getIcon());
             ((TextView) view.findViewById(R.id.app_label)).setText(item
                     .getLabel());
-            int icon_id = R.drawable.privilege_question;
-            switch (item.getPrivilegeConfig()) {
-                case PrivilegeConfigures.ALLOW:
-                    icon_id = R.drawable.privilege_allow;
-                    break;
-                case PrivilegeConfigures.DENY:
-                    icon_id = R.drawable.privilege_deny;
-                    break;
-                default:
-                case PrivilegeConfigures.QUESTION:
-                    icon_id = R.drawable.privilege_question;
-                    break;
-            }
-            ((ImageView) view.findViewById(R.id.config_icon))
-                    .setImageResource(icon_id);
+
+            ((ImageButton) view.findViewById(R.id.config_icon))
+                    .setImageResource(item.getPermissionConfigIconId());
 
             view.findViewById(R.id.config_icon).setOnClickListener(new OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "Config icon clicked.");
-                    AlertDialog dialog = new AlertDialog.Builder(AppListAdapter.this.getContext())
+                    final ImageButton ib = (ImageButton) v;
+                    final AlertDialog dialog = new AlertDialog.Builder(AppListAdapter.this
+                            .getContext())
                             .setIconAttribute(android.R.attr.alertDialogIcon)
                             .setTitle(R.string.permission_config)
-                            .setSingleChoiceItems(R.array.permission_choices, 0,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            // TODO
-                                        }
-                                    })
+                            .setSingleChoiceItems(R.array.permission_choices,
+                                    item.getPrivilegeConfig(), null)
                             .setPositiveButton(R.string.alert_dialog_ok,
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            // TODO
+                                            ListView lw = ((AlertDialog) dialog).getListView();
+                                            int pos = lw.getCheckedItemPosition();
+                                            Log.d(TAG,
+                                                    String.format(
+                                                            "Package name: %s, UID: %d, Privilege id: %d, Selected permission: %d.",
+                                                            item.mInfo.packageName,
+                                                            item.mInfo.uid,
+                                                            item.mPrivilegeId, pos));
+                                            if (pos != item.getPrivilegeConfig()) {
+                                                AppListAdapter.this.insertOrUpdatePermission(item,
+                                                        pos);
+                                                // reload the list to update the
+                                                // icon
+                                                ((ImageButton) ib)
+                                                        .setImageResource(item
+                                                                .getPermissionConfigIconId());
+                                            }
                                         }
                                     })
-                            .setNegativeButton(R.string.alert_dialog_cancel,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            // TODO
-                                        }
-                                    }).create();
+                            .setNegativeButton(R.string.alert_dialog_cancel, null).create();
                     dialog.setCanceledOnTouchOutside(false);
                     dialog.show();
                 }

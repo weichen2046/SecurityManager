@@ -1,6 +1,7 @@
 package com.chenwei.securitymanager.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import com.chenwei.securitymanager.provider.DBSchema.Tables;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
 
 public class SecurityManagerProvider extends ContentProvider {
@@ -130,8 +132,20 @@ public class SecurityManagerProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        // TODO Auto-generated method stub
-        return null;
+        String table;
+        switch (sUriMatcher.match(uri)) {
+            case PRIVILEGE_CONFIG_MATCH:
+                table = DBSchema.Tables.PRIVILEGE_CONFIG;
+                break;
+            default:
+                Log.e(TAG, "Insert: uri not any matchers, uir: " + uri.toString());
+                return null;
+        }
+        // Get the database and run the query
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        long rowId = db.insert(table, null, values);
+        Log.d(TAG, "Insert called, table: " + table);
+        return ContentUris.withAppendedId(PrivilegeConfig.CONTENT_URI, rowId);
     }
 
     @Override
@@ -143,8 +157,19 @@ public class SecurityManagerProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
-        // TODO Auto-generated method stub
-        return 0;
+        String table;
+        switch (sUriMatcher.match(uri)) {
+            case PRIVILEGE_CONFIG_MATCH:
+                table = DBSchema.Tables.PRIVILEGE_CONFIG;
+                break;
+            default:
+                Log.e(TAG, "Update: uri not any matchers, uir: " + uri.toString());
+                return 0;
+        }
+        // Get the database and run the query
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Log.d(TAG, "Update called, table: " + table);
+        return db.update(table, values, selection, selectionArgs);
     }
 
 }
