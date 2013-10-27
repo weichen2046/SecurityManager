@@ -20,14 +20,10 @@ import android.content.pm.Signature;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chenwei.securitymanager.provider.SecurityManagerContract;
@@ -66,8 +62,8 @@ public class MainActivity extends Activity {
                 .newTab()
                 .setText(R.string.by_app)
                 .setTabListener(
-                        new TabListener<CountingFragment>(this, "application",
-                                CountingFragment.class)));
+                        new TabListener<ApplicationsListFragment>(this, "application",
+                                ApplicationsListFragment.class)));
         // cv = (FrameLayout)findViewById(android.R.id.content);
         /* log all installed app infos */
         // this.debugPrintApplicationsInfo(this.getApplicationList(this));
@@ -307,47 +303,6 @@ public class MainActivity extends Activity {
 
         public void onTabReselected(Tab tab, FragmentTransaction ft) {
             Toast.makeText(mActivity, "Reselected!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public static class CountingFragment extends Fragment {
-        int mNum;
-
-        /**
-         * Create a new instance of CountingFragment, providing "num" as an
-         * argument.
-         */
-        static CountingFragment newInstance(int num) {
-            CountingFragment f = new CountingFragment();
-
-            // Supply num input as an argument.
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-
-            return f;
-        }
-
-        /**
-         * When creating, retrieve this instance's number from its arguments.
-         */
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        /**
-         * The Fragment's UI is just a simple text view showing its instance
-         * number.
-         */
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.hello_world, container, false);
-            View tv = v.findViewById(R.id.text);
-            ((TextView) tv).setText("Fragment #" + mNum);
-            return v;
         }
     }
 
