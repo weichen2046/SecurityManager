@@ -3,13 +3,6 @@ package com.chenwei.securitymanager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sprd.securitymanager.ShowAppByPrivilegeActivity.AppEntry;
-import com.sprd.securitymanager.provider.SecurityManagerContract.AndroidOriginPrivilege;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeConfigures;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeDetailsCategory;
-import com.sprd.securitymanager.provider.SecurityManagerContract.PrivilegeMap;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -28,13 +21,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.chenwei.securitymanager.provider.SecurityManagerContract.AndroidOriginPrivilege;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfigures;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetailsCategory;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeMap;
 
 class ExpandableListInfoEntry {
     public List<IdNamePair> mGroups;

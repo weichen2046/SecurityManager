@@ -175,12 +175,12 @@ public final class SecurityManagerContract {
      * */
     public static final class AndroidOriginPrivilege implements BaseColumns {
 
-        /**
         public static final Uri CONTENT_URI = Uri
                 .withAppendedPath(SecurityManagerContract.CONTENT_URI,
                         "android_origin_privilege");
+
+        /**
          * column orig_privilege_id.
-         * 
          * <p>
          * Type: INTEGER (NOT NULL)
          * </p>
@@ -211,12 +211,11 @@ public final class SecurityManagerContract {
      * */
     public static final class PrivilegeMap implements BaseColumns {
 
-        /**
         public static final Uri CONTENT_URI = Uri.withAppendedPath(
                 SecurityManagerContract.CONTENT_URI, "privilege_map");
 
+        /**
          * column privilege_id.
-         * 
          * <p>
          * Type: INTEGER (NOT NULL)
          * </p>
