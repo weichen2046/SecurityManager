@@ -1,4 +1,6 @@
 package com.chenwei.securitymanager.provider;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -15,6 +17,7 @@ import com.chenwei.securitymanager.provider.DBSchema.Tables;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeCategory;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeConfig;
 import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetails;
+import com.chenwei.securitymanager.provider.SecurityManagerContract.PrivilegeDetailsCategory;
 
 public class SecurityManagerProvider extends ContentProvider {
 
@@ -31,6 +34,9 @@ public class SecurityManagerProvider extends ContentProvider {
     private static final int PRIVILEGE_DETAILS_ITEM_MATCH = 21;
     private static final int PRIVILEGE_CONFIG_MATCH = 3;
     private static final int ANDROID_PERMISIONS_MATCH = 4;
+    private static final int PRIVILEGE_DETAILS_WITH_CATEGORY = 5;
+    private static final int PRIVILEGE_MAP_MATCH = 6;
+    private static final int ANDROID_ORIGIN_MATCH = 7;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -45,6 +51,14 @@ public class SecurityManagerProvider extends ContentProvider {
         sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
                 "privilege_config",
                 PRIVILEGE_CONFIG_MATCH);
+        sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
+                "privilege_details_category", PRIVILEGE_DETAILS_WITH_CATEGORY);
+        sUriMatcher.addURI(SecurityManagerContract.AUTHORITY, "privilege_map",
+                PRIVILEGE_MAP_MATCH);
+        sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
+                "android_origin_privilege",
+                ANDROID_ORIGIN_MATCH);
+
         // # is represent for privilege row id in table privilege_details
         // may be this need refactoring
         sUriMatcher.addURI(SecurityManagerContract.AUTHORITY,
@@ -100,6 +114,31 @@ public class SecurityManagerProvider extends ContentProvider {
             qb.appendWhere("privilege_map.privilege_id=(select "
                     + "privilege_details.privilege_id from privilege_details where privilege_details._id="
                     + uri.getPathSegments().get(1) + ")");
+            break;
+
+        case PRIVILEGE_DETAILS_WITH_CATEGORY:
+            qb.setTables("privilege_details a left join privilege_category b"
+                    + " on a.category_id = b.category_id");
+            Map<String, String> prjMap = new HashMap<String, String>();
+            prjMap.put(PrivilegeDetailsCategory._ID, "a."
+                    + PrivilegeDetailsCategory._ID);
+            prjMap.put(PrivilegeDetailsCategory.PRIVILEGE_ID,
+                    PrivilegeDetailsCategory.PRIVILEGE_ID);
+            prjMap.put(PrivilegeDetailsCategory.PRIVILEGE_NAME,
+                    PrivilegeDetailsCategory.PRIVILEGE_NAME);
+            prjMap.put(PrivilegeDetailsCategory.CATEGORY_ID, "a."
+                    + PrivilegeDetailsCategory.CATEGORY_ID);
+            prjMap.put(PrivilegeDetailsCategory.CATEGORY_NAME,
+                    PrivilegeDetailsCategory.CATEGORY_NAME);
+            qb.setProjectionMap(prjMap);
+            break;
+
+        case PRIVILEGE_MAP_MATCH:
+            qb.setTables("privilege_map");
+            break;
+
+        case ANDROID_ORIGIN_MATCH:
+            qb.setTables("android_origin_privilege");
             break;
 
         default:

@@ -176,6 +176,9 @@ public final class SecurityManagerContract {
     public static final class AndroidOriginPrivilege implements BaseColumns {
 
         /**
+        public static final Uri CONTENT_URI = Uri
+                .withAppendedPath(SecurityManagerContract.CONTENT_URI,
+                        "android_origin_privilege");
          * column orig_privilege_id.
          * 
          * <p>
@@ -193,6 +196,9 @@ public final class SecurityManagerContract {
          */
         public static final String ORIG_PRIVILEGE_NAME = "orig_privilege_name";
 
+        public static final String[] PROJECTION_FOR_ALL = new String[] { _ID,
+                ORIG_PRIVILEGE_ID, ORIG_PRIVILEGE_NAME };
+
         /**
          * This utility class cannot be instantiated
          */
@@ -206,6 +212,9 @@ public final class SecurityManagerContract {
     public static final class PrivilegeMap implements BaseColumns {
 
         /**
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(
+                SecurityManagerContract.CONTENT_URI, "privilege_map");
+
          * column privilege_id.
          * 
          * <p>
@@ -223,6 +232,8 @@ public final class SecurityManagerContract {
          */
         public static final String ORIG_PRIVILEGE_ID = "orig_privilege_id";
 
+        public static final String[] PROJECTION_FOR_ALL = new String[] { _ID,
+                PRIVILEGE_ID, ORIG_PRIVILEGE_ID };
         /**
          * This utility class cannot be instantiated
          */
@@ -294,5 +305,27 @@ public final class SecurityManagerContract {
          */
         private PrivilegeConfig() {
         }
+    }
+
+    /**
+     * Helper view table privilege_details_category
+     * 
+     * @author chenwei
+     * 
+     */
+    public static final class PrivilegeDetailsCategory implements BaseColumns {
+
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(
+                SecurityManagerContract.CONTENT_URI,
+                "privilege_details_category");
+
+        public static final String PRIVILEGE_ID = "privilege_id";
+        public static final String PRIVILEGE_NAME = "privilege_name";
+        public static final String CATEGORY_ID = "category_id";
+        public static final String CATEGORY_NAME = "category_name";
+
+        public static final String[] PROJECTION_FOR_ALL = new String[] { _ID,
+                PRIVILEGE_ID, PRIVILEGE_NAME, CATEGORY_ID, CATEGORY_NAME };
+
     }
 }

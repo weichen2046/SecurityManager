@@ -10,13 +10,16 @@ import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -59,6 +62,8 @@ class AppEntry {
 
 public class ApplicationsListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<List<AppEntry>> {
+
+    private static final String TAG = "ApplicationsListFragment";
 
     // This is the Adapter being used to display the list's data.
     AppListAdapter mAdapter;
@@ -251,7 +256,7 @@ public class ApplicationsListFragment extends ListFragment
                 holder.mIcon = (ImageView) convertView.findViewById(R.id.app_icon);
                 holder.mLabel = (TextView) convertView.findViewById(R.id.app_label);
                 holder.mButton = (ImageButton) convertView.findViewById(R.id.config_icon);
-
+                holder.mButton.setOnClickListener(mIconButtonClickListener);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -262,8 +267,27 @@ public class ApplicationsListFragment extends ListFragment
             holder.mLabel.setText(item.getLabel());
             holder.mButton.setImageResource(R.drawable.right_arrow);
 
+            holder.mButton.setTag(position);
+
             return convertView;
         }
+
+        private OnClickListener mIconButtonClickListener = new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                int pos = (Integer) v.getTag();
+                AppEntry item = getItem(pos);
+                Log.d(TAG, "Package name: " + item.getPackageName());
+
+                // Start activity to show privilege
+                Intent intent = new Intent(PrivilegesActivity.ACTION);
+                intent.putExtra(PrivilegesActivity.APP_PACKAGENAME_EXTRA,
+                        item.getPackageName());
+                getContext().startActivity(intent);
+            }
+
+        };
 
         static class ViewHolder {
             ImageView mIcon;

@@ -31,6 +31,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.chenwei.securitymanager.PrivilegesActivity">
+            <intent-filter>
+                <action android:name="android.intent.show_privilege_by_app" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <provider 
            android:name=".provider.SecurityManagerProvider"
            android:authorities="com.chenwei.securitymanager"

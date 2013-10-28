@@ -546,10 +546,8 @@ public class ShowAppByPrivilegeActivity extends Activity {
                                             if (pos != item.getPrivilegeConfig()) {
                                                 AppListAdapter.this.insertOrUpdatePermission(item,
                                                         pos);
-                                                // reload the list to update the
-                                                // icon
-                                                ((ImageButton) ib)
-                                                        .setImageResource(item
+                                                        // update the icon
+                                                        ib.setImageResource(item
                                                                 .getPermissionConfigIconId());
                                             }
                                         }
